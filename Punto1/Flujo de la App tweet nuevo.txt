@@ -1,0 +1,225 @@
+{
+    "properties": {
+        "provisioningState": "Succeeded",
+        "createdTime": "2022-05-25T04:45:25.5217115Z",
+        "changedTime": "2022-05-25T20:36:48.6175037Z",
+        "state": "Enabled",
+        "version": "08585480958768719632",
+        "accessEndpoint": "https://prod-23.northcentralus.logic.azure.com:443/workflows/57bf91c3fa974afe95ceb489ec083842",
+        "definition": {
+            "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+            "contentVersion": "1.0.0.0",
+            "parameters": {
+                "$connections": {
+                    "defaultValue": {},
+                    "type": "Object"
+                }
+            },
+            "triggers": {
+                "Cuando_se_publica_un_tweet_nuevo": {
+                    "recurrence": {
+                        "frequency": "Hour",
+                        "interval": 1
+                    },
+                    "evaluatedRecurrence": {
+                        "frequency": "Hour",
+                        "interval": 1
+                    },
+                    "splitOn": "@triggerBody()?['value']",
+                    "type": "ApiConnection",
+                    "inputs": {
+                        "host": {
+                            "connection": {
+                                "name": "@parameters('$connections')['twitter']['connectionId']"
+                            }
+                        },
+                        "method": "get",
+                        "path": "/onnewtweet",
+                        "queries": {
+                            "searchQuery": "#Petro"
+                        }
+                    }
+                }
+            },
+            "actions": {
+                "Para_cada_uno": {
+                    "foreach": "@body('Sentimiento_(V3.0)')['documents']",
+                    "actions": {
+                        "Enviar_correo_electrónico_(V2)": {
+                            "runAfter": {
+                                "TweetSentimentFunction": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "body": {
+                                    "Body": "<p>@{body('TweetSentimentFunction')}</p>",
+                                    "Subject": "@{body('TweetSentimentFunction')}@{triggerBody()?['TweetedBy']}@{triggerBody()?['UserDetails']?['FullName']}",
+                                    "To": "vanessa.ayala@uao.edu.co"
+                                },
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['gmail']['connectionId']"
+                                    }
+                                },
+                                "method": "post",
+                                "path": "/v2/Mail"
+                            }
+                        },
+                        "TweetSentimentFunction": {
+                            "runAfter": {},
+                            "type": "Function",
+                            "inputs": {
+                                "body": {
+                                    "sentimiento": "@{items('Para_cada_uno')['sentiment']}"
+                                },
+                                "function": {
+                                    "id": "/subscriptions/7b42bf26-f980-4ffc-932e-49e3e0e63670/resourceGroups/TweetTutorial/providers/Microsoft.Web/sites/TweetSentimentAPI09/functions/TweetSentimentFunction"
+                                }
+                            }
+                        }
+                    },
+                    "runAfter": {
+                        "Sentimiento_(V3.0)": [
+                            "Succeeded"
+                        ]
+                    },
+                    "type": "Foreach"
+                },
+                "Sentimiento_(V3.0)": {
+                    "runAfter": {},
+                    "type": "ApiConnection",
+                    "inputs": {
+                        "body": {
+                            "documents": [
+                                {
+                                    "id": "@triggerBody()?['TweetId']",
+                                    "language": "en",
+                                    "text": "@triggerBody()?['TweetText']"
+                                }
+                            ]
+                        },
+                        "host": {
+                            "connection": {
+                                "name": "@parameters('$connections')['cognitiveservicestextanalytics']['connectionId']"
+                            }
+                        },
+                        "method": "post",
+                        "path": "/text/analytics/v3.0/sentiment"
+                    }
+                }
+            },
+            "outputs": {}
+        },
+        "parameters": {
+            "$connections": {
+                "value": {
+                    "cognitiveservicestextanalytics": {
+                        "connectionId": "/subscriptions/7b42bf26-f980-4ffc-932e-49e3e0e63670/resourceGroups/TweetTutorial/providers/Microsoft.Web/connections/cognitiveservicestextanalytics",
+                        "connectionName": "cognitiveservicestextanalytics",
+                        "id": "/subscriptions/7b42bf26-f980-4ffc-932e-49e3e0e63670/providers/Microsoft.Web/locations/northcentralus/managedApis/cognitiveservicestextanalytics"
+                    },
+                    "gmail": {
+                        "connectionId": "/subscriptions/7b42bf26-f980-4ffc-932e-49e3e0e63670/resourceGroups/TweetTutorial/providers/Microsoft.Web/connections/gmail",
+                        "connectionName": "gmail",
+                        "id": "/subscriptions/7b42bf26-f980-4ffc-932e-49e3e0e63670/providers/Microsoft.Web/locations/northcentralus/managedApis/gmail"
+                    },
+                    "twitter": {
+                        "connectionId": "/subscriptions/7b42bf26-f980-4ffc-932e-49e3e0e63670/resourceGroups/TweetTutorial/providers/Microsoft.Web/connections/twitter-4",
+                        "connectionName": "twitter-4",
+                        "id": "/subscriptions/7b42bf26-f980-4ffc-932e-49e3e0e63670/providers/Microsoft.Web/locations/northcentralus/managedApis/twitter"
+                    }
+                }
+            }
+        },
+        "endpointsConfiguration": {
+            "workflow": {
+                "outgoingIpAddresses": [
+                    {
+                        "address": "168.62.248.37"
+                    },
+                    {
+                        "address": "157.55.210.61"
+                    },
+                    {
+                        "address": "157.55.212.238"
+                    },
+                    {
+                        "address": "52.162.208.216"
+                    },
+                    {
+                        "address": "52.162.213.231"
+                    },
+                    {
+                        "address": "65.52.10.183"
+                    },
+                    {
+                        "address": "65.52.9.96"
+                    },
+                    {
+                        "address": "65.52.8.225"
+                    },
+                    {
+                        "address": "20.94.150.220"
+                    },
+                    {
+                        "address": "20.94.149.199"
+                    },
+                    {
+                        "address": "20.88.209.97"
+                    },
+                    {
+                        "address": "20.88.209.88"
+                    }
+                ],
+                "accessEndpointIpAddresses": [
+                    {
+                        "address": "168.62.249.81"
+                    },
+                    {
+                        "address": "157.56.12.202"
+                    },
+                    {
+                        "address": "65.52.211.164"
+                    },
+                    {
+                        "address": "65.52.9.64"
+                    },
+                    {
+                        "address": "20.94.151.41"
+                    },
+                    {
+                        "address": "20.88.209.113"
+                    }
+                ]
+            },
+            "connector": {
+                "outgoingIpAddresses": [
+                    {
+                        "address": "52.162.126.4"
+                    },
+                    {
+                        "address": "52.162.242.161"
+                    },
+                    {
+                        "address": "52.162.107.160/28"
+                    },
+                    {
+                        "address": "52.162.111.192/27"
+                    },
+                    {
+                        "address": "20.51.4.192/27"
+                    },
+                    {
+                        "address": "20.51.4.224/28"
+                    }
+                ]
+            }
+        }
+    },
+    "id": "/subscriptions/7b42bf26-f980-4ffc-932e-49e3e0e63670/resourceGroups/TweetTutorial/providers/Microsoft.Logic/workflows/TweetSentimentApp",
+    "name": "TweetSentimentApp",
+    "type": "Microsoft.Logic/workflows",
+    "location": "northcentralus"
+}
