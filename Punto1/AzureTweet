@@ -1,0 +1,22 @@
+Creación del recurso.
+
+Clave 1 - 
+
+8b4de4ff81eb4c69bbaf42d986267c1b
+
+Clave 2
+
+7cbb661fdd7848289d05cfc85a9af2e0
+
+Ubicación 
+
+eastus
+
+Extremo
+
+https://tweetfinalapp.cognitiveservices.azure.com/
+
+**** Crear App TweetSentimentApp 
+
+/subscriptions/7b42bf26-f980-4ffc-932e-49e3e0e63670/resourcegroups/TweetTutorial/providers/Microsoft.Logic/workflows/TweetSentimentApp
+
